@@ -1,6 +1,6 @@
 use axum::{extract::State, http::StatusCode, response::Html, routing::get, Router};
 use dal::Dal;
-use handlebars::Handlebars;
+use handlebars::{handlebars_helper, no_escape, Handlebars};
 use shuttle_runtime::CustomError;
 use sqlx::{migrate::Migrator, PgPool};
 use std::path::PathBuf;
@@ -33,10 +33,14 @@ struct AppState {
     templates: Handlebars<'static>,
 }
 
+handlebars_helper!(markdown: |md: String| comrak::markdown_to_html(&md, &Default::default()));
+
 pub async fn app(pool: PgPool, assets_folder: PathBuf) -> Result<Router, CustomError> {
     MIGRATOR.run(&pool).await.map_err(CustomError::new)?;
 
     let mut handlebars = Handlebars::new();
+    handlebars.register_helper("markdown", Box::new(markdown));
+    handlebars.register_escape_fn(no_escape);
     handlebars.register_templates_directory(".hbs", assets_folder.join("templates"))?;
 
     let state = AppState {
