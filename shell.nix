@@ -11,7 +11,7 @@ in
       pkg-config
     ];
     buildInputs = with nixpkgs; [
-      (rustChannelOf{ channel = "1.69.0"; }).rust
+      (rustChannelOf{ channel = "1.72.0"; }).rust
       docker
     ];
   }

@@ -1,12 +1,9 @@
-use axum::{routing::get, Router};
-
-async fn hello_world() -> &'static str {
-    "Hello, world!"
-}
+use blog::app;
+use sqlx::PgPool;
 
 #[shuttle_runtime::main]
-async fn axum() -> shuttle_axum::ShuttleAxum {
-    let router = Router::new().route("/", get(hello_world));
+async fn axum(#[shuttle_shared_db::Postgres] pool: PgPool) -> shuttle_axum::ShuttleAxum {
+    let app = app(pool).await?;
 
-    Ok(router.into())
+    Ok(app.into())
 }
