@@ -1,4 +1,10 @@
-use axum::{extract::State, http::StatusCode, response::Html, routing::get, Router};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    response::Html,
+    routing::get,
+    Router,
+};
 use dal::Dal;
 use handlebars::{handlebars_helper, no_escape, Handlebars};
 use shuttle_runtime::CustomError;
@@ -9,10 +15,27 @@ use tracing::error;
 
 mod dal;
 
-async fn blog(
+async fn home(
     State(AppState { dal, templates }): State<AppState>,
 ) -> Result<Html<String>, StatusCode> {
-    let blog = dal.get_blog("tmp").await.map_err(|error| {
+    let blogs = dal.get_blogs().await.map_err(|error| {
+        error!(%error, "failed to get blogs from storage");
+        StatusCode::NOT_FOUND
+    })?;
+
+    let page = templates.render("home", &blogs).map_err(|error| {
+        error!(%error, "failed to home page");
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    Ok(Html(page))
+}
+
+async fn blog(
+    Path(title): Path<String>,
+    State(AppState { dal, templates }): State<AppState>,
+) -> Result<Html<String>, StatusCode> {
+    let blog = dal.get_blog(&title).await.map_err(|error| {
         error!(%error, "failed to get blog from storage");
         StatusCode::NOT_FOUND
     })?;
@@ -49,7 +72,8 @@ pub async fn app(pool: PgPool, assets_folder: PathBuf) -> Result<Router, CustomE
     };
 
     let router = Router::new()
-        .route("/", get(blog))
+        .route("/", get(home))
+        .route("/:title", get(blog))
         .nest_service("/static", ServeDir::new(assets_folder.join("static")))
         .with_state(state);
 

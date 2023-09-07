@@ -13,11 +13,20 @@ impl Dal {
         Self { pool }
     }
 
-    pub async fn get_blog(&self, _title: &str) -> Result<Blog> {
-        // sqlx::query_as("SELECT * FROM blogs WHERE title = $1")
-        let blog = sqlx::query_as("SELECT * FROM blogs LIMIT 1")
-            // .bind(title)
+    /// Get a single blog with the given title
+    pub async fn get_blog(&self, title: &str) -> Result<Blog> {
+        let blog = sqlx::query_as("SELECT * FROM blogs WHERE title = $1")
+            .bind(title)
             .fetch_one(&self.pool)
+            .await?;
+
+        Ok(blog)
+    }
+
+    /// Get all blogs
+    pub async fn get_blogs(&self) -> Result<Vec<Blog>> {
+        let blog = sqlx::query_as("SELECT * FROM blogs")
+            .fetch_all(&self.pool)
             .await?;
 
         Ok(blog)

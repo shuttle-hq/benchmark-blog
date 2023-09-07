@@ -1,4 +1,4 @@
-use blog::app;
+use benchmark_blog::app;
 use sqlx::PgPool;
 use std::path::PathBuf;
 
