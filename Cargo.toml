@@ -7,10 +7,13 @@ edition = "2021"
 anyhow = "1.0.75"
 axum = "0.6.18"
 chrono = { version = "0.4.29", features = ["serde"] }
+handlebars = { version = "4.4.0", features = ["dir_source"] }
 serde = { version = "1.0.188", features = ["derive"] }
 shuttle-axum = "0.25.0"
 shuttle-runtime = "0.25.0"
 shuttle-shared-db = { version = "0.25.0", features = ["postgres"] }
+shuttle-static-folder = "0.25.0"
 sqlx = { version = "0.7.1", features = ["chrono", "postgres", "runtime-tokio-native-tls"] }
 tokio = "1.28.2"
+tower-http = { version = "0.4.4", features = ["fs"] }
 tracing = "0.1.37"
